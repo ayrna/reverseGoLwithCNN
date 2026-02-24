@@ -1,8 +1,7 @@
-# reverseGoLwithCNN
-
-# Project Name
+# Reverse GoL with CNN
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](#)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
