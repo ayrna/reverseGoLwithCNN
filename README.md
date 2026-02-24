@@ -20,7 +20,7 @@ organisation of the automaton.
 
 The project is organized into modular directories separating the research environment from the execution pipeline:
 
-* **`Auxiliares/`**: Core helper functions, custom classes, and shared utilities utilized across the execution scripts.
+* **`Auxiliares/`**: Core helper functions (`functions`), custom classes (`Clases`) utilized across the execution scripts.
 * **`Crossvalidation/`**: Scripts dedicated specifically to the cross-validation procedures for the Classic model.
 * **`Notebooks/`**: Jupyter notebooks containing exploratory data analysis (EDA), experimental results, and detailed research findings.
 * **`TrainVal/`**: Execution scripts handling the model training and validation phases.
@@ -39,7 +39,7 @@ Ensure you have the following installed before running the pipeline:
 * scipy==1.17.1
 * tensorflow==2.20.0
 
-You can install these dependences by running: 
+These dependences can be installed by running:
 `1pip install -r requirements.txt`
 
 ## 🔬 Usage Pipeline
