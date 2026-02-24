@@ -16,7 +16,7 @@ by approximately 40% compared to the baseline approach. Furthermore, the analysi
 of cells. In contrast, the use of structural metrics reveals that the proposed architecture effectively captures the underlying physics and spatial
 organisation of the automaton.
 
-## 🏗️ Repository Structure
+## 📂 Repository Structure
 
 The project is organized into modular directories separating the research environment from the execution pipeline:
 
@@ -26,7 +26,7 @@ The project is organized into modular directories separating the research enviro
 * **`TrainVal/`**: Execution scripts handling the model training and validation phases.
 * **`Test/`**: Scripts for final model testing and performance evaluation on hold-out data.
 
-## ⚠️ Prerequisites
+## 🛠️ Prerequisites
 Ensure you have the following installed before running the pipeline:
 * Python 3.10.x
 * keras==3.12.0
@@ -42,8 +42,7 @@ Ensure you have the following installed before running the pipeline:
 You can install these dependences by running: 
 `1pip install -r requirements.txt`
 
-
-## 🔢 Usage Pipeline
+## 🔬 Usage Pipeline
 To reproduce the research or evaluate the models, follow this standard execution flow:
 
 1. **Cross-Validation (Classic Model):** Run the scripts in `Crossvalidation/` to perform robust validation specifically on the classic architecture.
@@ -51,6 +50,6 @@ To reproduce the research or evaluate the models, follow this standard execution
 3. **Testing:** Once trained, evaluate the models against the test dataset using the scripts in the `Test/` directory.
 4. **Analysis:** Review the files in `Notebooks/` for visual representations of metrics, data distributions, and final research conclusions.
 
-## License
+## ⚖️ License
 
 This project is distributed under the [GPL-3.0 License](LICENSE). See the `LICENSE` file for more details.
