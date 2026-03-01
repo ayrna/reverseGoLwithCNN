@@ -40,7 +40,7 @@ Ensure you have the following installed before running the pipeline:
 * tensorflow==2.20.0
 
 These dependences can be installed by running:
-`1pip install -r requirements.txt`
+`pip install -r requirements.txt`
 
 ## 🔬 Usage Pipeline
 To reproduce the research or evaluate the models, follow this standard execution flow:
