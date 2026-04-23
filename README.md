@@ -21,11 +21,17 @@ organisation of the automaton.
 
 The project is organized into modular directories separating the research environment from the execution pipeline:
 
+<details>
+<summary>TensorFlow</summary>
+  
 * **`Auxiliares/`**: Core helper functions (`functions`), custom classes (`Clases`) utilized across the execution scripts.
 * **`Crossvalidation/`**: Scripts dedicated specifically to the cross-validation procedures for the Classic model.
 * **`Notebooks/`**: Jupyter notebooks containing exploratory data analysis (EDA), experimental results, and detailed research findings.
 * **`TrainVal/`**: Execution scripts handling the model training and validation phases.
 * **`Test/`**: Scripts for final model testing and performance evaluation on hold-out data.
+
+</details>
+
 
 ## 🛠️ Prerequisites
 Ensure you have the following installed before running the pipeline:
@@ -46,10 +52,15 @@ These dependences can be installed by running:
 ## 🔬 Usage Pipeline
 To reproduce the research or evaluate the models, follow this standard execution flow:
 
+<details>
+<summary>TensorFlow</summary>
+
 1. **Cross-Validation (Classic Model):** Run the scripts in `Crossvalidation/` to perform robust validation specifically on the classic architecture.
 2. **Training & Validation:** Execute the relevant scripts within the `TrainVal/` directory to train the models and tune hyperparameters.
 3. **Testing:** Once trained, evaluate the models against the test dataset using the scripts in the `Test/` directory.
 4. **Analysis:** Review the files in `Notebooks/` for visual representations of metrics, data distributions, and final research conclusions.
+
+</details>
 
 ## ⚖️ License
 
