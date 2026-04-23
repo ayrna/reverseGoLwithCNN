@@ -22,7 +22,7 @@ organisation of the automaton.
 The project is organized into modular directories separating the research environment from the execution pipeline:
 
 <details>
-<summary>TensorFlow</summary>
+<summary><strong>TensorFlow</strong></summary>
   
 * **`Auxiliares/`**: Core helper functions (`functions`), custom classes (`Clases`) utilized across the execution scripts.
 * **`Crossvalidation/`**: Scripts dedicated specifically to the cross-validation procedures for the Classic model.
@@ -35,6 +35,9 @@ The project is organized into modular directories separating the research enviro
 
 ## 🛠️ Prerequisites
 Ensure you have the following installed before running the pipeline:
+<details>
+<summary><strong>TensorFlow</strong></summary>
+
 * Python 3.10.x
 * keras==3.12.0
 * keras_tuner==1.4.8
@@ -45,15 +48,16 @@ Ensure you have the following installed before running the pipeline:
 * sacred==0.8.7
 * scipy==1.17.1
 * tensorflow==2.20.0
+</details>
 
-These dependences can be installed by running:
+These dependences can be installed by running:  
 `pip install -r requirements.txt`
 
 ## 🔬 Usage Pipeline
 To reproduce the research or evaluate the models, follow this standard execution flow:
 
 <details>
-<summary>TensorFlow</summary>
+<summary><strong>TensorFlow</strong></summary>
 
 1. **Cross-Validation (Classic Model):** Run the scripts in `Crossvalidation/` to perform robust validation specifically on the classic architecture.
 2. **Training & Validation:** Execute the relevant scripts within the `TrainVal/` directory to train the models and tune hyperparameters.
