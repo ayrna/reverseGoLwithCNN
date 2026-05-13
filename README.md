@@ -20,7 +20,7 @@ of cells. In contrast, the use of structural metrics reveals that the proposed a
 organisation of the automaton.
 
 --- 
-### **Ablation of the Differentiable Game of Life for the Reverse Problem**
+### **Ablation of the Differentiable Game of Life for the reverse problem**
 **Abstract:** Recent advancements in the reverse Game of Life problem
 have demonstrated the efficacy of integrating a Differentiable Game of
 Life layer within Convolutional Neural Networks along with a fuzziness
