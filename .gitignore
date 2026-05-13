@@ -84,7 +84,16 @@ ipython_config.py
 
 # Datos / resultados (tu caso)
 Resultados/
-PyTorch/
+PyTorch/Articles
+PyTorch/Data
+PyTorch/Config
+PyTorch/Notebooks/FutureWork/
+PyTorch/Notebooks/Results_Annealed.ipynb
+PyTorch/TrainTest/Annealed/
+PyTorch/TrainTest/FutureWork/
+PyTorch/TrainTest/DiffGoLDice
+run_condor*
+run_experiment*
 # pyenv
 #   For a library or package, you might want to ignore these files since the code is
 #   intended to run in multiple environments; otherwise, check them in:
