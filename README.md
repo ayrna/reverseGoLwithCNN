@@ -19,6 +19,7 @@ by approximately 40% compared to the baseline approach. Furthermore, the analysi
 of cells. In contrast, the use of structural metrics reveals that the proposed architecture effectively captures the underlying physics and spatial
 organisation of the automaton.
 
+--- 
 ### **Ablation of the Differentiable Game of Life for the Reverse Problem**
 **Abstract:** Recent advancements in the reverse Game of Life problem
 have demonstrated the efficacy of integrating a Differentiable Game of
