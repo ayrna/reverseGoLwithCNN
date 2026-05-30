@@ -7,7 +7,7 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?logo=PyTorch&logoColor=white)
 
 ## 📑 Overview
-### **A CNN-based approach to reverse Game of Life**
+### **[A CNN-based approach to reverse Game of Life](https://link.springer.com/chapter/10.1007/978-3-032-27317-8_25)**
 **Abstract:** The Game of Life (GoL) is a cellular automaton characterised by non-linear evolution and emergent complexity. Its global state
 transition function is non-injective and irreversible, leading to information loss. Consequently, the Reverse GoL, i.e., finding a predecessor that
 evolves into a given target after a given number of generations, is an NP-complete task. In this paper, we introduce a differentiable GoL transition function within a convolutional neural network-based model to
