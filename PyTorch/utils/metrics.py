@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import ot 
 from scipy.spatial.distance import cdist
 from joblib import Parallel, delayed
+import torch 
+from torchmetrics.functional import roc, auroc
 
 def fuzziness_index(y_pred, shape: tuple):
     """
@@ -232,10 +234,8 @@ def wasserstein(y_pred, y_true, shape:tuple, max_penalty:float = 20.0):
 
     print(f"Wasserstein (EMD): {np.mean(emds):.4f} ± {np.std(emds):.4f}")
 
+def wasserstein_optim(y_pred, y_true, shape: tuple, max_penalty: float = 20.0, n_jobs: int = -1):
 
-
-def wasserstein_optim(y_pred, y_true, shape: tuple, max_penalty: float = 20.0,
-                n_jobs: int = -1):
     y_pred = np.asarray(y_pred, dtype=np.float64)
     y_true = np.asarray(y_true, dtype=np.float64)
 
@@ -266,3 +266,67 @@ def wasserstein_optim(y_pred, y_true, shape: tuple, max_penalty: float = 20.0,
         emds.append(np.mean(results))
 
     print(f"Wasserstein (EMD): {np.mean(emds):.4f} ± {np.std(emds):.4f}")
+
+def computeROC(y_pred, y_true, mean_fpr):
+    """
+    Compute per-board ROC metrics, averaged within each seed.
+ 
+    For every seed, this function iterates over its boards and, for each board,
+    computes the ROC curve, the AUROC, and the threshold that maximizes Youden's
+    J statistic (TPR - FPR). The per-board TPR curves are interpolated onto a
+    shared FPR grid. The per-board TPR curves, AUROC values, and thresholds are
+    then averaged across the boards of that seed, yielding a single curve, a
+    single AUROC, and a single threshold per seed.
+ 
+    Args:
+        y_pred (array-like): Predicted scores/probabilities with shape
+            ``(n_seeds, n_boards, n_cells)``.
+        y_true (array-like): Binary ground-truth labels aligned with ``y_pred``,
+            with the same shape.
+        mean_fpr (array-like): Common FPR grid used to interpolate the per-board
+            TPR curves before averaging.
+ 
+    Returns:
+        tuple[list[np.ndarray], list[float], list[float]]: Three lists, each of
+        length ``n_seeds``:
+            - Mean interpolated TPR curve per seed (averaged over its boards).
+            - Mean AUROC per seed (averaged over its boards).
+            - Mean Youden threshold per seed (averaged over its boards).
+    """
+ 
+    # Seed loop
+    tprs_interp, aucs, best_ths = [], [], []
+    for pred, gtruth in zip(y_pred, y_true):
+
+        # Convert to tensor -->  shape (n_seeds, n_boards, n_cells)
+        pred = torch.tensor(pred, dtype=torch.float32)
+        gtruth = torch.tensor(gtruth, dtype=torch.bool)
+
+        # Board loop
+        board_tprs, board_aucs, board_ths = [], [], []
+        for b_pred, b_gtruth in zip(pred, gtruth):
+
+            # Compute the ROC curve and the AUROC for this board
+            fpr, tpr, thresholds = roc(b_pred, b_gtruth, task="binary")
+            score = auroc(b_pred, b_gtruth, task="binary")
+ 
+            # To numpy
+            fpr, tpr, thresholds = fpr.numpy(), tpr.numpy(), thresholds.numpy()
+ 
+            # Best threshold by Youden's J statistic --> max(tpr - fpr)
+            best_idx = np.argmax(tpr - fpr)
+            board_ths.append(thresholds[best_idx])
+ 
+            # Interpolate this board's curve onto the common grid
+            interp_tpr = np.interp(mean_fpr, fpr, tpr)
+            interp_tpr[0] = 0.0
+            board_tprs.append(interp_tpr)
+            board_aucs.append(score.item())
+ 
+        # Average over boards -> a single value for this seed
+        tprs_interp.append(np.mean(board_tprs, axis=0))
+        aucs.append(np.mean(board_aucs))
+        best_ths.append(np.mean(board_ths))
+ 
+    return tprs_interp, aucs, best_ths
+        

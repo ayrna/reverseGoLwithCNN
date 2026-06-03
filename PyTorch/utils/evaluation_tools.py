@@ -320,4 +320,90 @@ def compute_metrics(paths_pred:dict[int,Path], paths_test:dict[int,Path], shape:
         mt.plot_density(y_pred, y_true, bins, colors, figsize, alpha, title, log_scale)
 
 
-
+def computeROC(paths_pred: dict[int, Path], paths_test: dict[int, Path], state: str, shape: tuple):
+    """
+    Compute and plot the mean ROC curve across multiple seeds, averaged over the 
+    boards of each seed.
+ 
+    Args:
+        paths_pred (dict[int, Path]):  Dictionary mapping seeds to paths of the CSV files to process.
+        paths_test (dict[int, Path]):  Dictionary mapping seeds to paths of the NPZ files to process.
+        state (str): Target state to evaluate. Accepted values are
+            ``'Initial'``, ``'Final'``, ``'initial'``, ``'final'``, ``'init'`` and ``'fin'``.
+        shape (tuple): Grid shape ``(rows, cols)`` used to determine the number of state columns to read.
+ 
+    Returns:
+        tuple[float, np.ndarray]: A tuple containing:
+            - Mean optimal decision threshold across all seeds.
+            - Per-seed mean thresholds with shape ``(n_seeds,)``, where each
+              entry is the threshold of one seed (already averaged over its
+              boards). Useful for plotting the best threshold of each seed.
+ 
+    Displays:
+        Prints the mean and standard deviation of the best threshold across
+        seeds, and shows a ROC plot.
+ 
+    Raises:
+        AssertionError: If ``state`` is not one of the accepted identifiers.
+    """
+ 
+    # Check whether state is a valid identifier
+    list2check = ['Initial', 'Final', 'initial', 'final', 'init', 'fin']
+    assert state in list2check, f'"{state}" is not a valid state. Valid states: {list2check}'
+ 
+    if state in ['Initial', 'initial', 'init']:
+        cols2select = [f'start_{i}' for i in range(shape[0] * shape[1])]
+        init = True
+        title = f'Initial States ROC Curve ({len(paths_pred)} seeds)'
+ 
+    elif state in ['Final', 'final', 'fin']:
+        cols2select = [f'stop_{i}' for i in range(shape[0] * shape[1])]
+        init = False
+        title = f'Final States ROC Curve ({len(paths_pred)} seeds)'
+ 
+    # Load data: one (n_boards, n_cells) array per seed
+    y_true = []
+    y_pred = []
+    for path_pred, path_true in zip(paths_pred.values(), paths_test.values()):
+ 
+        if init:
+            _, true_states, _ = load_npz(path_true, 'test.npz')
+        else:
+            _, _, true_states = load_npz(path_true, 'test.npz')
+ 
+        pred_states = pd.read_csv(path_pred)[cols2select].values
+ 
+        y_true.append(true_states)
+        y_pred.append(pred_states)
+ 
+    # Common grid to average curves that have a different number of points
+    mean_fpr = np.linspace(0, 1, 100)
+ 
+    # Compute ROC
+    tprs_interp, aucs, best_ths = mt.computeROC(y_pred, y_true, mean_fpr)
+ 
+    # Aggregate the TPR curves across seeds
+    tprs_interp = np.array(tprs_interp)          # shape (n_seeds, len(mean_fpr))
+    mean_tpr = tprs_interp.mean(axis=0)
+    mean_tpr[-1] = 1.0
+    std_tpr = tprs_interp.std(axis=0)
+ 
+    # Aggregate the thresholds across seeds
+    best_ths = np.array(best_ths)                # shape (n_seeds,)
+    mean_ths = best_ths.mean()
+    std_ths = best_ths.std()
+ 
+    print(f'Threshold: {mean_ths:.4f} ± {std_ths:.4f}')
+ 
+    # Plot
+    plt.plot(mean_fpr, mean_tpr, label=f'Mean ROC (AUC = {np.mean(aucs):.4f} ± {np.std(aucs):.4f})')
+    plt.fill_between(mean_fpr, np.clip(mean_tpr - std_tpr, 0, 1), np.clip(mean_tpr + std_tpr, 0, 1), alpha=0.2, label='± std')
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.title(title)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.xlim([0, 1]); plt.ylim([0, 1])
+    plt.legend()
+    plt.show()
+ 
+    return mean_ths, best_ths
