@@ -5,6 +5,7 @@ from scipy.spatial.distance import cdist
 from joblib import Parallel, delayed
 import torch 
 from torchmetrics.functional import roc, auroc
+import utils.experiment_tools as tools
 
 def fuzziness_index(y_pred, shape: tuple):
     """
@@ -329,4 +330,38 @@ def computeROC(y_pred, y_true, mean_fpr):
         best_ths.append(np.mean(board_ths))
  
     return tprs_interp, aucs, best_ths
+
+def computeCM(y_pred, y_true, threshold, metrics2compute):
+
+    # Loop
+    per_seed = {metric: [] for metric in metrics2compute}
+    for pred, gtruth in zip(y_pred, y_true):
+
+        # Convert to tensor -->  shape (n_seeds, n_boards, n_cells)
+        pred = torch.tensor(pred, dtype=torch.float32)
+        gtruth = torch.tensor(gtruth, dtype=torch.long)
+
+        # Compute each metric:
+        for metric in metrics2compute:
+
+            # Get it
+            metric_fn = tools.get_metric(metric, task='binary', threshold=threshold)
+
+            # Compute it
+            value = metric_fn(pred, gtruth)        
+
+            # Save it
+            per_seed[metric].append(value.item())
+
+    # Save
+    results = np.array([per_seed[m] for m in metrics2compute])
+
+    # Compute mean values
+    mean_values = results.mean(axis=1)
+    stds = results.std(axis=1)  
+
+    return mean_values, stds
+
+    
+   
         
