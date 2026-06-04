@@ -380,7 +380,7 @@ def computeROC(paths_pred: dict[int, Path], paths_test: dict[int, Path], state: 
     mean_fpr = np.linspace(0, 1, 100)
  
     # Compute ROC
-    tprs_interp, aucs, best_ths = mt.computeROC(y_pred, y_true, mean_fpr)
+    tprs_interp, aucs, best_ths, all_boards_ths = mt.computeROC(y_pred, y_true, mean_fpr)
  
     # Aggregate the TPR curves across seeds
     tprs_interp = np.array(tprs_interp)          # shape (n_seeds, len(mean_fpr))
@@ -390,23 +390,40 @@ def computeROC(paths_pred: dict[int, Path], paths_test: dict[int, Path], state: 
  
     # Aggregate the thresholds across seeds
     best_ths = np.array(best_ths)                # shape (n_seeds,)
-    mean_ths = best_ths.mean()
+    mean_ths = np.median(best_ths)
     std_ths = best_ths.std()
  
     print(f'Threshold: {mean_ths:.4f} ± {std_ths:.4f}')
  
     # Plot
-    plt.plot(mean_fpr, mean_tpr, label=f'Mean ROC (AUC = {np.mean(aucs):.4f} ± {np.std(aucs):.4f})')
-    plt.fill_between(mean_fpr, np.clip(mean_tpr - std_tpr, 0, 1), np.clip(mean_tpr + std_tpr, 0, 1), alpha=0.2, label='± std')
-    plt.plot([0, 1], [0, 1], 'k--')
-    plt.title(title)
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.xlim([0, 1]); plt.ylim([0, 1])
-    plt.legend()
+    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+
+    # --- Gráfico izquierdo: Curva ROC ---
+    ax0 = axes[0]
+    ax0.plot(mean_fpr, mean_tpr, label=f'Mean ROC (AUC = {np.mean(aucs):.4f} ± {np.std(aucs):.4f})')
+    ax0.fill_between(mean_fpr, np.clip(mean_tpr - std_tpr, 0, 1), np.clip(mean_tpr + std_tpr, 0, 1),
+                    alpha=0.2, label='± std')
+    ax0.plot([0, 1], [0, 1], 'k--')
+    ax0.set_title(title)
+    ax0.set_xlabel('False Positive Rate')
+    ax0.set_ylabel('True Positive Rate')
+    ax0.set_xlim([0, 1]); ax0.set_ylim([0, 1])
+    ax0.legend()
+
+    # --- Gráfico derecho: Distribución de umbrales ---
+    ax1 = axes[1]
+    ax1.boxplot(all_boards_ths, patch_artist=True,
+                boxprops=dict(facecolor="#cfe3f7", edgecolor="#3b6ea5"),
+                medianprops=dict(color="#3b6ea5"))
+    ax1.set_xlabel("Seed")
+    ax1.set_ylabel("Threshold Distribution")
+    ax1.set_title("Youden's Optimal Threshold Distribution")
+    ax1.grid(axis="y", linestyle=":", alpha=0.5)
+
+    plt.tight_layout()
     plt.show()
  
-    return mean_ths, best_ths
+    return mean_ths, all_boards_ths
 
 def computeCM(paths_pred:dict[int, Path], paths_test:dict[int, Path], metrics2compute:list[str], threshold:float, shape:tuple[int,int], state:str='initial'):
     

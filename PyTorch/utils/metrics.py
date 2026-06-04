@@ -288,7 +288,7 @@ def computeROC(y_pred, y_true, mean_fpr):
             TPR curves before averaging.
  
     Returns:
-        tuple[list[np.ndarray], list[float], list[float]]: Three lists, each of
+        tuple[list[np.ndarray], list[float], list[float]], list[[]]: Three lists, each of
         length ``n_seeds``:
             - Mean interpolated TPR curve per seed (averaged over its boards).
             - Mean AUROC per seed (averaged over its boards).
@@ -296,7 +296,7 @@ def computeROC(y_pred, y_true, mean_fpr):
     """
  
     # Seed loop
-    tprs_interp, aucs, best_ths = [], [], []
+    tprs_interp, aucs, best_ths, all_board_ths = [], [], [], []
     for pred, gtruth in zip(y_pred, y_true):
 
         # Convert to tensor -->  shape (n_seeds, n_boards, n_cells)
@@ -323,13 +323,14 @@ def computeROC(y_pred, y_true, mean_fpr):
             interp_tpr[0] = 0.0
             board_tprs.append(interp_tpr)
             board_aucs.append(score.item())
- 
+
         # Average over boards -> a single value for this seed
         tprs_interp.append(np.mean(board_tprs, axis=0))
         aucs.append(np.mean(board_aucs))
         best_ths.append(np.mean(board_ths))
+        all_board_ths.append(np.array(board_ths))
  
-    return tprs_interp, aucs, best_ths
+    return tprs_interp, aucs, best_ths, all_board_ths
 
 def computeCM(y_pred, y_true, threshold, metrics2compute):
 
