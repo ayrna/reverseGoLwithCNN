@@ -407,3 +407,40 @@ def computeROC(paths_pred: dict[int, Path], paths_test: dict[int, Path], state: 
     plt.show()
  
     return mean_ths, best_ths
+
+def computeCM(paths_pred:dict[int, Path], paths_test:dict[int, Path], metrics2compute:list[str], threshold:float, shape:tuple[int,int], state:str='initial'):
+    
+    # Security assert
+    list2check = ['initial', 'Initial', 'init', 'final', 'Final', 'fin']
+    assert state in list2check, f'"{state}" is not a valid state. Valid states: {list2check}'
+
+    # Load the data:
+    if state in ['Initial', 'initial', 'init']:
+        cols2select = [f'start_{i}' for i in range(shape[0] * shape[1])]
+        init = True
+        title = f'--- Results Initial states ({len(paths_pred)} seeds) ---'
+ 
+    elif state in ['Final', 'final', 'fin']:
+        cols2select = [f'stop_{i}' for i in range(shape[0] * shape[1])]
+        init = False
+        title = f'--- Results Final states ({len(paths_pred)} seeds) ---'
+
+    y_true = []
+    y_pred = []
+    for path_pred, path_true in zip(paths_pred.values(), paths_test.values()):
+ 
+        if init:
+            _, true_states, _ = load_npz(path_true, 'test.npz')
+        else:
+            _, _, true_states = load_npz(path_true, 'test.npz')
+ 
+        pred_states = pd.read_csv(path_pred)[cols2select].values
+ 
+        y_true.append(true_states)
+        y_pred.append(pred_states)
+
+    mean_values, stds = mt.computeCM(y_pred, y_true, threshold, metrics2compute)
+    
+    print(title)
+    for metric_name, mean_value, std_value in zip(metrics2compute, mean_values, stds):
+        print(f'{metric_name}: {mean_value:.4f} ± {std_value:.4f}')
