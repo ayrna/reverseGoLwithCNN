@@ -1,10 +1,10 @@
 # **Reverse Game of Life with CNN**
-
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+![Status](https://img.shields.io/badge/status-active-brightgreen?logo=git&logoColor=white)
 [![Python 3.10.19](https://img.shields.io/badge/Python-3.10.19-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![Jupyter Notebook](https://img.shields.io/badge/Jupyter-F37626.svg?logo=Jupyter&logoColor=white)](https://jupyter.org/)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=flat&logo=tensorflow&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?logo=PyTorch&logoColor=white)
+[![Jupyter Notebook](https://img.shields.io/badge/Jupyter-F37626.svg?logo=Jupyter&logoColor=white)](https://jupyter.org/)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## 📑 Overview
 ### **[A CNN-based approach to reverse Game of Life](https://link.springer.com/chapter/10.1007/978-3-032-27317-8_25)**
