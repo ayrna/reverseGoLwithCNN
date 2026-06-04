@@ -456,7 +456,7 @@ def computeCM(paths_pred:dict[int, Path], paths_test:dict[int, Path], metrics2co
         y_true.append(true_states)
         y_pred.append(pred_states)
 
-    mean_values, stds = mt.computeCM(y_pred, y_true, threshold, metrics2compute)
+    mean_values, stds = mt.computeCM_bxb(y_pred, y_true, threshold, metrics2compute)
     
     print(title)
     for metric_name, mean_value, std_value in zip(metrics2compute, mean_values, stds):

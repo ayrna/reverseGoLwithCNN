@@ -363,6 +363,40 @@ def computeCM(y_pred, y_true, threshold, metrics2compute):
 
     return mean_values, stds
 
+def computeCM_bxb(y_pred, y_true, thresholds, metrics2compute):
+
+    # Loop
+    per_seed = {metric: [] for metric in metrics2compute}
+    for pred, gtruth, ths in zip(y_pred, y_true, thresholds):
+
+        # Convert to tensor -->  shape (n_seeds, n_boards, n_cells)
+        pred = torch.tensor(pred, dtype=torch.float32)
+        gtruth = torch.tensor(gtruth, dtype=torch.long)
+
+        assert len(ths) == pred.shape[0], f"Thresholds ({len(ths)}) != n_boards ({pred.shape[0]})"
+        
+        # Compute each metric:
+        for metric in metrics2compute:
+
+            # Get it
+            per_board = []
+            for b_pred, b_gtruth, threshold in zip(pred, gtruth, ths):
+                metric_fn = tools.get_metric(metric, task='binary', threshold=float(threshold))
+
+                # Compute it
+                per_board.append(metric_fn(b_pred, b_gtruth).item())
+
+            # Save it
+            per_seed[metric].append(np.array(per_board).mean())
+
+    # Save
+    results = np.array([per_seed[m] for m in metrics2compute])
+
+    # Compute mean values
+    mean_values = results.mean(axis=1)
+    stds = results.std(axis=1)  
+
+    return mean_values, stds
     
    
         
