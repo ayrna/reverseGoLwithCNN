@@ -1,7 +1,4 @@
-# Byte-compiled / optimized / DLL files
 __pycache__/
-
-# Datos / resultados (tu caso)
 Resultados/
 PyTorch/Articles
 PyTorch/Data
@@ -11,6 +8,7 @@ PyTorch/Notebooks/Results_Annealed.ipynb
 PyTorch/TrainTest/Annealed/
 PyTorch/TrainTest/FutureWork/
 PyTorch/TrainTest/DiffGoLDice
+PyTorch/NewData
 run_condor*
 run_experiment*
 

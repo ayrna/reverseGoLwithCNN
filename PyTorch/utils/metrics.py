@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import ot 
+import cv2
 from scipy.spatial.distance import cdist
 from joblib import Parallel, delayed
 import torch 
@@ -398,5 +399,21 @@ def computeCM_bxb(y_pred, y_true, thresholds, metrics2compute):
 
     return mean_values, stds
     
-   
+def otsu_per_board(y_pred, shape=(15, 15)):
+    
+    boards = np.asarray(y_pred, dtype=np.float64).reshape(-1, *shape)
+    thresholds = np.empty(boards.shape[0])
+    binarized = np.empty_like(boards, dtype=np.uint8)
+
+    for i, board in enumerate(boards):
+        img = np.round(board * 255).astype(np.uint8)
+        if img.min() == img.max():            # tablero constante: Otsu no aplica
+            thresholds[i] = 0.5               # fallback documentado
+            binarized[i] = (board >= 0.5).astype(np.uint8)
+            continue
+        t, board_bin = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        thresholds[i] = t / 255.0
+        binarized[i] = (board_bin // 255).astype(np.uint8)
+
+    return thresholds, binarized  
         

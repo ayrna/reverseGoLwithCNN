@@ -461,3 +461,61 @@ def computeCM(paths_pred:dict[int, Path], paths_test:dict[int, Path], metrics2co
     print(title)
     for metric_name, mean_value, std_value in zip(metrics2compute, mean_values, stds):
         print(f'{metric_name}: {mean_value:.4f} ± {std_value:.4f}')
+
+def computeOtsu(paths_pred: dict[int, Path], state: str, shape: tuple):
+    """Umbrales de Otsu por tablero sobre los heatmaps predichos, agrupados por semilla."""
+
+    valid = {'initial': True, 'init': True, 'Initial': True,
+             'final': False, 'fin': False, 'Final': False}
+    assert state in valid, f'"{state}" no es válido. Estados: {list(valid)}'
+
+    prefix = 'start_' if valid[state] else 'stop_'
+    cols2select = [f'{prefix}{i}' for i in range(shape[0] * shape[1])]
+
+    thresholds_per_seed = {}
+    for seed, path_pred in paths_pred.items():
+        pred_states = pd.read_csv(path_pred)[cols2select].values
+        thr, _ = mt.otsu_per_board(pred_states, shape)
+        thresholds_per_seed[seed] = thr
+
+    return thresholds_per_seed
+
+def computeCM_OTSU(paths_pred:dict[int, Path], paths_test:dict[int, Path],
+              metrics2compute:list[str], thresholds:dict[int, np.ndarray],
+              shape:tuple[int,int], state:str='initial'):
+
+    list2check = ['initial', 'Initial', 'init', 'final', 'Final', 'fin']
+    assert state in list2check, f'"{state}" is not a valid state. Valid states: {list2check}'
+
+    if state in ['Initial', 'initial', 'init']:
+        cols2select = [f'start_{i}' for i in range(shape[0] * shape[1])]
+        init = True
+        title = f'--- Results Initial states ({len(paths_pred)} seeds) ---'
+    elif state in ['Final', 'final', 'fin']:
+        cols2select = [f'stop_{i}' for i in range(shape[0] * shape[1])]
+        init = False
+        title = f'--- Results Final states ({len(paths_pred)} seeds) ---'
+
+    y_true, y_pred, thr_list = [], [], []
+    for seed, path_pred in paths_pred.items():
+        path_true = paths_test[seed]
+
+        if init:
+            _, true_states, _ = load_npz(path_true, 'test.npz')
+        else:
+            _, _, true_states = load_npz(path_true, 'test.npz')
+
+        pred_states = pd.read_csv(path_pred)[cols2select].values
+
+        assert thresholds[seed].shape[0] == pred_states.shape[0], \
+            f'Seed {seed}: {thresholds[seed].shape[0]} umbrales para {pred_states.shape[0]} tableros'
+
+        y_true.append(true_states)
+        y_pred.append(pred_states)
+        thr_list.append(thresholds[seed])      # (n_boards,) por semilla
+
+    mean_values, stds = mt.computeCM_bxb(y_pred, y_true, thr_list, metrics2compute)
+
+    print(title)
+    for metric_name, mean_value, std_value in zip(metrics2compute, mean_values, stds):
+        print(f'{metric_name}: {mean_value:.4f} ± {std_value:.4f}')
