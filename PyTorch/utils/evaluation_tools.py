@@ -172,11 +172,11 @@ def display_results(files_paths:dict[int, Path], distinguisher:str, cols2omit:in
         plt.show()
 
     
-def display_states(file_pred:str, file_test:str, shape:tuple,threshold:float, titles:list[str], 
+def display_states(file_pred:str, file_test:str, shape:tuple, threshold:float, titles:list[str], 
                    subplots_grid:tuple, model_name:str, figsize:tuple, random:bool=False):
 
     """
-    Plots a 2×3 grid of subfigures comparing true and predicted boards for a
+    Plots a 2x3 grid of subfigures comparing true and predicted boards for a
     Conway's Game of Life experiment.
 
     Layout:
@@ -186,7 +186,7 @@ def display_states(file_pred:str, file_test:str, shape:tuple,threshold:float, ti
         │  Final   · True │  Final   · Heat  │  Final   · Comparison     │
         └─────────────────┴──────────────────┴───────────────────────────┘
 
-    Columns 1–2 are rendered in grayscale via `multiGrays`.
+    Columns 1-2 are rendered in grayscale via `multiGrays`.
     Column 3 is a cell-wise TP/FP/FN/TN colour map via `multiComparison`.
     A shared legend is placed to the right of the figure.
 
