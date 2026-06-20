@@ -333,7 +333,7 @@ def computeROC(y_pred, y_true, mean_fpr):
  
     return tprs_interp, aucs, best_ths, all_board_ths
 
-def computeCM(y_pred, y_true, threshold, metrics2compute):
+def computeCM(y_pred, y_true, metrics2compute):
 
     # Loop
     per_seed = {metric: [] for metric in metrics2compute}
@@ -347,7 +347,7 @@ def computeCM(y_pred, y_true, threshold, metrics2compute):
         for metric in metrics2compute:
 
             # Get it
-            metric_fn = tools.get_metric(metric, task='binary', threshold=threshold)
+            metric_fn = tools.get_metric(metric, task='binary')
 
             # Compute it
             value = metric_fn(pred, gtruth)        
@@ -416,4 +416,23 @@ def otsu_per_board(y_pred, shape=(15, 15)):
         binarized[i] = (board_bin // 255).astype(np.uint8)
 
     return thresholds, binarized  
-        
+
+def gauss_per_board(y_pred, shape=(15, 15), block_size=3, C=0):
+    boards = np.asarray(y_pred, dtype=np.float64).reshape(-1, *shape)
+    binarized = np.empty_like(boards, dtype=np.uint8)
+
+    for i, board in enumerate(boards):
+        img = np.round(board * 255).astype(np.uint8)
+        if img.min() == img.max():          # tablero constante
+            binarized[i] = (board >= 0.5).astype(np.uint8)
+            continue
+        board_bin = cv2.adaptiveThreshold(
+            img, 255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY,
+            block_size, C,                    # ambos obligatorios
+        )
+        binarized[i] = (board_bin // 255).astype(np.uint8)
+
+    return binarized 
+

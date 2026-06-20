@@ -519,3 +519,44 @@ def computeCM_OTSU(paths_pred:dict[int, Path], paths_test:dict[int, Path],
     print(title)
     for metric_name, mean_value, std_value in zip(metrics2compute, mean_values, stds):
         print(f'{metric_name}: {mean_value:.4f} ± {std_value:.4f}')
+
+def computeCM_gauss(paths_pred:dict[int, Path], paths_test:dict[int, Path],
+              metrics2compute:list[str],
+              shape:tuple[int,int], state:str='initial'):
+
+    list2check = ['initial', 'Initial', 'init', 'final', 'Final', 'fin']
+    assert state in list2check, f'"{state}" is not a valid state. Valid states: {list2check}'
+
+    if state in ['Initial', 'initial', 'init']:
+        cols2select = [f'start_{i}' for i in range(shape[0] * shape[1])]
+        init = True
+        title = f'--- Results Initial states ({len(paths_pred)} seeds) ---'
+    elif state in ['Final', 'final', 'fin']:
+        cols2select = [f'stop_{i}' for i in range(shape[0] * shape[1])]
+        init = False
+        title = f'--- Results Final states ({len(paths_pred)} seeds) ---'
+
+    y_true, y_pred = [], []
+    for seed, path_pred in paths_pred.items():
+        path_true = paths_test[seed]
+
+        if init:
+            _, true_states, _ = load_npz(path_true, 'test.npz')
+        else:
+            _, _, true_states = load_npz(path_true, 'test.npz')
+
+        probs = pd.read_csv(path_pred)[cols2select].values          # (n_boards, 225) floats
+
+        # --- binarización gaussiana ANTES de medir ---
+        bin_boards  = mt.gauss_per_board(probs, shape=shape)           # (n_boards, 15, 15) uint8
+        pred_states = bin_boards.reshape(bin_boards.shape[0], -1)   # de vuelta a (n_boards, 225)
+
+        y_true.append(true_states)
+        y_pred.append(pred_states)
+       
+
+    mean_values, stds = mt.computeCM(y_pred, y_true, metrics2compute)
+
+    print(title)
+    for metric_name, mean_value, std_value in zip(metrics2compute, mean_values, stds):
+        print(f'{metric_name}: {mean_value:.4f} ± {std_value:.4f}')
