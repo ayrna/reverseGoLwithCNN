@@ -3,12 +3,13 @@ Resultados/
 PyTorch/Articles
 PyTorch/Data
 PyTorch/Config
-PyTorch/Notebooks_20x20
-PyTorch/Notebooks_25x25
+PyTorch/Notebooks_15x15_2
 PyTorch/Notebooks_30x30
 run_condor*
 run_experiment*
 
 PostProcessing/Data
 PostProcessing/DataPR
+ReverseGoL/
+
 TODOList.md
