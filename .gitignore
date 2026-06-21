@@ -3,12 +3,9 @@ Resultados/
 PyTorch/Articles
 PyTorch/Data
 PyTorch/Config
-PyTorch/Notebooks/FutureWork/
-PyTorch/Notebooks/Results_Annealed.ipynb
-PyTorch/TrainTest/Annealed/
-PyTorch/TrainTest/FutureWork/
-PyTorch/TrainTest/DiffGoLDice
-PyTorch/NewData
+PyTorch/Notebooks_20x20
+PyTorch/Notebooks_25x25
+PyTorch/Notebooks_30x30
 run_condor*
 run_experiment*
 
