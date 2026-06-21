@@ -9,5 +9,6 @@ PyTorch/Notebooks_30x30
 run_condor*
 run_experiment*
 
-Regressor/
+PostProcessing/Data
+PostProcessing/DataPR
 TODOList.md

@@ -365,7 +365,7 @@ def computeROC(paths_pred: dict[int, Path], paths_test: dict[int, Path], state: 
     y_true = []
     y_pred = []
     for path_pred, path_true in zip(paths_pred.values(), paths_test.values()):
- 
+        
         if init:
             _, true_states, _ = load_npz(path_true, 'test.npz')
         else:
@@ -412,7 +412,9 @@ def computeROC(paths_pred: dict[int, Path], paths_test: dict[int, Path], state: 
 
     # --- Gráfico derecho: Distribución de umbrales ---
     ax1 = axes[1]
+    seeds = list(paths_pred.keys())    
     ax1.boxplot(all_boards_ths, patch_artist=True,
+                tick_labels=seeds,
                 boxprops=dict(facecolor="#cfe3f7", edgecolor="#3b6ea5"),
                 medianprops=dict(color="#3b6ea5"))
     ax1.set_xlabel("Seed")
@@ -423,9 +425,8 @@ def computeROC(paths_pred: dict[int, Path], paths_test: dict[int, Path], state: 
     plt.tight_layout()
     plt.show()
  
-    return mean_ths, all_boards_ths
-
-def computeCM(paths_pred:dict[int, Path], paths_test:dict[int, Path], metrics2compute:list[str], threshold:float, shape:tuple[int,int], state:str='initial'):
+def ComputeCM(paths_pred:dict[int, Path], paths_test:dict[int, Path], metrics2compute:list[str], 
+                  thresholds:list[list], shape:tuple[int,int], state:str='initial'):
     
     # Security assert
     list2check = ['initial', 'Initial', 'init', 'final', 'Final', 'fin']
@@ -456,7 +457,7 @@ def computeCM(paths_pred:dict[int, Path], paths_test:dict[int, Path], metrics2co
         y_true.append(true_states)
         y_pred.append(pred_states)
 
-    mean_values, stds = mt.computeCM_bxb(y_pred, y_true, threshold, metrics2compute)
+    mean_values, stds = mt.computeCM_bxb(y_pred, y_true, thresholds, metrics2compute)
     
     print(title)
     for metric_name, mean_value, std_value in zip(metrics2compute, mean_values, stds):
@@ -475,12 +476,12 @@ def computeOtsu(paths_pred: dict[int, Path], state: str, shape: tuple):
     thresholds_per_seed = {}
     for seed, path_pred in paths_pred.items():
         pred_states = pd.read_csv(path_pred)[cols2select].values
-        thr, _ = mt.otsu_per_board(pred_states, shape)
+        thr = mt.otsu_per_board(pred_states, shape)
         thresholds_per_seed[seed] = thr
 
     return thresholds_per_seed
 
-def computeCM_OTSU(paths_pred:dict[int, Path], paths_test:dict[int, Path],
+def ComputeCM_Otsu(paths_pred:dict[int, Path], paths_test:dict[int, Path],
               metrics2compute:list[str], thresholds:dict[int, np.ndarray],
               shape:tuple[int,int], state:str='initial'):
 
@@ -520,9 +521,8 @@ def computeCM_OTSU(paths_pred:dict[int, Path], paths_test:dict[int, Path],
     for metric_name, mean_value, std_value in zip(metrics2compute, mean_values, stds):
         print(f'{metric_name}: {mean_value:.4f} ± {std_value:.4f}')
 
-def computeCM_gauss(paths_pred:dict[int, Path], paths_test:dict[int, Path],
-              metrics2compute:list[str],
-              shape:tuple[int,int], state:str='initial'):
+def ComputeCM_Gauss(paths_pred:dict[int, Path], paths_test:dict[int, Path],
+              metrics2compute:list[str], shape:tuple[int,int], state:str='initial'):
 
     list2check = ['initial', 'Initial', 'init', 'final', 'Final', 'fin']
     assert state in list2check, f'"{state}" is not a valid state. Valid states: {list2check}'
@@ -554,7 +554,6 @@ def computeCM_gauss(paths_pred:dict[int, Path], paths_test:dict[int, Path],
         y_true.append(true_states)
         y_pred.append(pred_states)
        
-
     mean_values, stds = mt.computeCM(y_pred, y_true, metrics2compute)
 
     print(title)
