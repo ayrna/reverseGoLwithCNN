@@ -61,8 +61,18 @@ The project is organized into modular directories separating the research enviro
 <details>
 <summary><strong>PyTorch</strong></summary>
   
-* **`Notebooks/`**: Jupyter notebooks containing exploratory data analysis (EDA), experimental results, and detailed research findings.
+* **`Notebooks_15x15/`**: Jupyter notebooks containing exploratory data analysis (EDA), experimental results, and detailed research findings for 15x15 boards.
+* **`Notebooks_20x20/`**: Jupyter notebooks containing exploratory data analysis (EDA), experimental results, and detailed research findings for 20x20 boards.
+* **`Notebooks_25x25/`**: Jupyter notebooks containing exploratory data analysis (EDA), experimental results, and detailed research findings for 25x25 boards.
 * **`TrainTest/`**: Execution scripts handling the model training, validation and test phases.
+* **`utils/`**: Core helper functions and custom classes utilized across the execution scripts.
+
+</details>
+
+<details>
+<summary><strong>PostProcessing</strong></summary>
+  
+* **`GenerateDataset/`**: Execution scripts handling the data generation.
 * **`utils/`**: Core helper functions and custom classes utilized across the execution scripts.
 
 </details>
