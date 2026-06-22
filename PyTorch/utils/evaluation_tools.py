@@ -272,7 +272,7 @@ def display_states(file_pred:str, file_test:str, shape:tuple, threshold:float, t
     fig.legend(
     handles=legend_elements, loc="center left", ncol=1, fontsize=10, framealpha=0.8, bbox_to_anchor=(1, 0.5))   
     plt.show()
-
+    return tabs2plot 
 def compute_metrics(paths_pred:dict[int,Path], paths_test:dict[int,Path], shape:tuple, state:str, th_range:list[tuple], threshold:float, max_penalty:float= 20,
                     display_plot:bool=True, bins:int =30, colors:list[str] =['blue', 'red'], figsize:tuple=(10,6),alpha:float=0.5,log_scale:bool=True):
     

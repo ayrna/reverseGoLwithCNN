@@ -13,7 +13,7 @@ def config():
     delta:int = 1
     seed:int = 100
 
-    path2data:str = '../PyTorch/Data'
+    path2data:str = '../PyTorch/Data/'
     path2save:str = './Data'
 
     model_name:str = 'DiffGoL'
@@ -29,7 +29,7 @@ def main(shape, delta, seed, path2data, path2save, model_name, samples2get, samp
     data.create_train_dataset(path2data=path2data, path2save=path2save, model_name=model_name, shape=shape, seed=seed, samples2get=samples2get)
 
     # Create Test dataset
-    data.create_random_test(path2data=path2data, path2save=path2save, model=model_name, shape=shape,seed=seed, samples_per_seed=samples2get_test)
+    data.create_random_test(path2data=path2data, path2save=path2save, model=model_name, shape=shape,seed=seed, samples2get=samples2get_test)
 
 if __name__=='__main__':
     ex.run_commandline()

@@ -234,7 +234,7 @@ def computeCM(paths_cm:dict[int, Path], paths_thrs:dict[int,Path], metrics2compu
         print(f'{metric_name}: {mean_value:.4f} ± {std_value:.4f}')
 
    
-def display_states(path2tabs: Path, paths2model: dict[int, Path], shape: tuple[int, int], model_hp: dict):
+def display_states(path2tabs: Path, paths2model: dict[int, Path], shape: tuple[int, int], model_hp: dict, thresholds=None, method:str='Regressor Model'):
 
     H, W = shape
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -262,17 +262,18 @@ def display_states(path2tabs: Path, paths2model: dict[int, Path], shape: tuple[i
     fin_true  = df_tabs[gtfin].values              # estado final real (binario) -> "Final State"
 
     # Load the model
-    model = torch.compile(Regressor(n_hidden_filters=model_hp['n_hidden_filters'], kernel_size=model_hp['kernel_size'],
-                                    mlp_hidden=model_hp['mlp_hidden'], use_stats=model_hp['use_stats'],
-                                    padding_mode=model_hp['padding_mode']).to(device))
-    checkpoint = torch.load(path2model, map_location=device)
-    model.load_state_dict(checkpoint['model_state_dict'])
+    if thresholds is None:
+        model = torch.compile(Regressor(n_hidden_filters=model_hp['n_hidden_filters'], kernel_size=model_hp['kernel_size'],
+                                        mlp_hidden=model_hp['mlp_hidden'], use_stats=model_hp['use_stats'],
+                                        padding_mode=model_hp['padding_mode']).to(device))
+        checkpoint = torch.load(path2model, map_location=device)
+        model.load_state_dict(checkpoint['model_state_dict'])
 
-    # Un threshold por tablero, inferido del heatmap inicial
-    model.eval()
-    with torch.no_grad():
-        init_pred_torch = torch.tensor(init_pred, dtype=torch.float32).reshape(-1, 1, H, W).to(device)
-        thresholds = model(init_pred_torch).cpu().numpy().reshape(-1)   # shape (N,)
+        # Un threshold por tablero, inferido del heatmap inicial
+        model.eval()
+        with torch.no_grad():
+            init_pred_torch = torch.tensor(init_pred, dtype=torch.float32).reshape(-1, 1, H, W).to(device)
+            thresholds = model(init_pred_torch).cpu().numpy().reshape(-1)   # shape (N,)
 
     # ---- helpers -------------------------------------------------------
     def _style(ax):
@@ -297,7 +298,7 @@ def display_states(path2tabs: Path, paths2model: dict[int, Path], shape: tuple[i
     n_samples = min(9, len(df_tabs))               # primeros 9 tableros del CSV
     fig = plt.figure(figsize=(12, 9), constrained_layout=True)
     subfigs = fig.subfigures(2, 3, wspace=0.07, hspace=0.07)
-    fig.suptitle('Regressor Model', fontsize=14)
+    fig.suptitle(method, fontsize=14)
     titles = ['Initial State', 'Heatmap', 'Binarized Heatmap',
               'Final State', 'DiffGoL Evolution', 'Binarized Evolution']
 
@@ -420,7 +421,7 @@ def computeCM_Otsu(paths2cm:dict[int,Path], thresholds_otsu:dict[int, list], sha
         print(f'{metric_name}: {mean_value:.4f} ± {std_value:.4f}')
     
 
-def computeCM_Gauss(paths2cm:dict[int,Path], shape:tuple[int,int], metrics2compute:list[str]):
+def computeCM_Gauss(paths2cm:dict[int,Path], shape:tuple[int,int], metrics2compute:list[str], block_size, C):
     """Compute confusion-matrix metrics after Gaussian binarization.
 
     This function reads the initial and ground-truth states from each CSV in
@@ -456,7 +457,7 @@ def computeCM_Gauss(paths2cm:dict[int,Path], shape:tuple[int,int], metrics2compu
         y_true.append(df[gtin_cols].values)                       # gt de ESTE seed
 
         seed_pred   = df[init_cols].values                        # (n_boards, n_cells) de ESTE seed
-        bin_boards  = mt.gauss_per_board(seed_pred, shape=shape)   # (n_boards, 15, 15) uint8
+        bin_boards  = mt.gauss_per_board(seed_pred, shape=shape, block_size=block_size, C=C)   # (n_boards, 15, 15) uint8
         pred_states = bin_boards.reshape(bin_boards.shape[0], -1)  # (n_boards, n_cells)
         y_pred.append(pred_states)                                # binarizado de ESTE seed
 
@@ -487,3 +488,89 @@ def computeCM_direct(paths2cm:dict[int,Path],shape:tuple[int,int], metrics2compu
     print(f'--- Results Initial states ({len(paths2cm)} seeds) ---')
     for metric_name, mean_value, std_value in zip(metrics2compute, mean_values, stds):
         print(f'{metric_name}: {mean_value:.4f} ± {std_value:.4f}')
+
+
+def display_states_gauss(path2tabs, shape, block_size, C):
+    
+    # Headers
+    gtin, init_cols, gtfin, stop_cols = [], [], [], []
+    for i in range(int(np.prod(shape))):
+        gtin.append(f'gtin_{i}')
+        gtfin.append(f'gtfin_{i}')                 # corregido: era 'gftin_' (typo)
+        init_cols.append(f'start_{i}')
+        stop_cols.append(f'stop_{i}')
+    
+    # Load the data
+    df_tabs = pd.read_csv(path2tabs, sep=',')
+    init_pred = df_tabs[init_cols].values          # heatmap inicial (continuo) -> "Heatmap"
+    init_true = df_tabs[gtin].values               # estado inicial real (binario) -> "Initial State"
+    fin_pred  = df_tabs[stop_cols].values          # evolución DiffGoL (continua) -> "DiffGoL Evolution"
+    fin_true  = df_tabs[gtfin].values              # estado final real (binario) -> "Final State"
+
+    init_pred_bin = mt.gauss_per_board(init_pred, shape=shape,block_size=block_size, C=C)
+    fin_pred_bin = mt.gauss_per_board(fin_pred, shape=shape, block_size=block_size, C=C)
+
+    # ---- helpers -------------------------------------------------------
+    def _style(ax):
+        ax.set_xticks([]); ax.set_yticks([])
+        ax.set_xticks(np.arange(-0.5, W, 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, H, 1), minor=True)
+        ax.grid(which='minor', color='gray', linewidth=0.5)
+        ax.tick_params(which='both', length=0)
+        ax.set_axisbelow(False)                    # rejilla por encima del imshow
+
+    def _comparison_rgb(pred_bin, true_bin):
+        pred_bin = pred_bin.astype(bool)
+        true_bin = true_bin.astype(bool)
+        rgb = np.zeros((H, W, 3))
+        rgb[ pred_bin &  true_bin] = (0/255,   200/255, 0/255)   # TP verde
+        rgb[ pred_bin & ~true_bin] = (220/255, 0/255,   0/255)   # FP rojo
+        rgb[~pred_bin &  true_bin] = (0/255,   80/255,  220/255) # FN azul
+        # ~pred & ~true -> TN se queda negro
+        return rgb
+
+    # ---- figura --------------------------------------------------------
+    n_samples = min(9, len(df_tabs))               # primeros 9 tableros del CSV
+    fig = plt.figure(figsize=(12, 9), constrained_layout=True)
+    subfigs = fig.subfigures(2, 3, wspace=0.07, hspace=0.07)
+    fig.suptitle('Gaussian method', fontsize=14)
+    titles = ['Initial State', 'Heatmap', 'Binarized Heatmap',
+              'Final State', 'DiffGoL Evolution', 'Binarized Evolution']
+    H,W = shape
+    for panel, subfig in enumerate(subfigs.flat):
+        subfig.suptitle(titles[panel], fontsize=14)
+        axs = subfig.subplots(nrows=3, ncols=3)
+        for k, ax in enumerate(axs.flat):
+            _style(ax)
+            if k >= n_samples:
+                ax.set_visible(False)
+                continue
+
+            
+            if panel == 0:                          # Initial State (real)
+                ax.imshow(init_true[k].reshape(H, W), cmap='gray', vmin=0, vmax=1)
+            elif panel == 1:                        # Heatmap (predicción soft)
+                ax.imshow(init_pred[k].reshape(H, W), cmap='gray', vmin=0, vmax=1)
+            elif panel == 2:                        # Binarized Heatmap vs inicial real
+                pred_bin = init_pred_bin[k].reshape(H, W) 
+                ax.imshow(_comparison_rgb(pred_bin, init_true[k].reshape(H, W)))
+            elif panel == 3:                        # Final State (real)
+                ax.imshow(fin_true[k].reshape(H, W), cmap='gray', vmin=0, vmax=1)
+            elif panel == 4:                        # DiffGoL Evolution (soft)
+                ax.imshow(fin_pred[k].reshape(H, W), cmap='gray', vmin=0, vmax=1)
+            else:                                   # Binarized Evolution vs final real
+                pred_bin = fin_pred_bin[k].reshape(H, W) 
+                ax.imshow(_comparison_rgb(pred_bin, fin_true[k].reshape(H, W)))
+
+    # Legend
+    legend_elements = [
+        mpatches.Patch(color=(1, 1, 1),                 label="Live (true)", ec="gray"),
+        mpatches.Patch(color=(0, 0, 0),                 label="Dead (true)", ec="gray"),
+        mpatches.Patch(color=(0/255,   200/255, 0/255), label="TP"),
+        mpatches.Patch(color=(220/255, 0/255,   0/255), label="FP"),
+        mpatches.Patch(color=(0/255,   80/255,  220/255), label="FN"),
+        mpatches.Patch(color=(0, 0, 0),                 label="TN"),
+    ]
+    fig.legend(handles=legend_elements, loc="center left", ncol=1, fontsize=10,
+               framealpha=0.8, bbox_to_anchor=(1, 0.5))
+    plt.show()

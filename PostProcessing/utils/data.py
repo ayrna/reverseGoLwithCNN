@@ -464,9 +464,10 @@ def create_train_dataset(path2data:Path, path2save:Path, model_name:str='DiffGoL
     preds, gtruths = [], []
     model = torch.compile(DiffGoLModel(6, 48, 3, 1, 50.0, 4.0).to(device))
     for run_dir in sorted(d for d in path2data.iterdir() if d.is_dir()):
-        model_file = run_dir / 'Results' / model_name / 'model.pt'
-        train_file = run_dir / 'ConwayStates' / 'Train' / model_name / 'train0.npz'
-        val_file   = run_dir / 'ConwayStates' / 'Validation' / model_name / 'val0.npz'
+        if f'{shape[0]}x{shape[1]}' in str(run_dir):
+            model_file = run_dir / 'Results' / model_name / 'model.pt'
+            train_file = run_dir / 'ConwayStates' / 'Train' / model_name / 'train0.npz'
+            val_file   = run_dir / 'ConwayStates' / 'Validation' / model_name / 'val0.npz'
 
         if not (model_file.exists() and train_file.exists() and val_file.exists()):
             continue   # run incompleto, lo saltas
@@ -594,8 +595,9 @@ def create_random_test(path2data:Path, path2save:Path, model:str='DiffGoL', shap
     # Get the files:
     preds, gtruths = [], []
     for run_dir in sorted(d for d in path2data.iterdir() if d.is_dir()):
-        datafile = run_dir / 'Results' / model / 'predictions.csv'
-        testfile = run_dir / 'ConwayStates' / 'Test' / 'test.npz'
+        if f'{shape[0]}x{shape[1]}' in str(run_dir):
+            datafile = run_dir / 'Results' / model / 'predictions.csv'
+            testfile = run_dir / 'ConwayStates' / 'Test' / 'test.npz'
 
         if not (datafile.exists() and testfile.exists()):
             continue
