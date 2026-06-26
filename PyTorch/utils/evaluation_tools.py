@@ -400,15 +400,13 @@ def computeROC(paths_pred: dict[int, Path], paths_test: dict[int, Path], state: 
 
     # --- Gráfico izquierdo: Curva ROC ---
     ax0 = axes[0]
-    ax0.plot(mean_fpr, mean_tpr, label=f'Mean ROC (AUC = {np.mean(aucs):.4f} ± {np.std(aucs):.4f})')
-    ax0.fill_between(mean_fpr, np.clip(mean_tpr - std_tpr, 0, 1), np.clip(mean_tpr + std_tpr, 0, 1),
-                    alpha=0.2, label='± std')
+    ax0.plot(mean_fpr, mean_tpr, label=f'AUC = {np.mean(aucs):.4f}')
     ax0.plot([0, 1], [0, 1], 'k--')
     ax0.set_title(title)
-    ax0.set_xlabel('False Positive Rate')
-    ax0.set_ylabel('True Positive Rate')
+    ax0.set_xlabel('False Positive Rate',fontsize=14)
+    ax0.set_ylabel('True Positive Rate',fontsize=14)
     ax0.set_xlim([0, 1]); ax0.set_ylim([0, 1])
-    ax0.legend()
+    ax0.legend(fontsize=12)
 
     # --- Gráfico derecho: Distribución de umbrales ---
     ax1 = axes[1]
@@ -417,9 +415,9 @@ def computeROC(paths_pred: dict[int, Path], paths_test: dict[int, Path], state: 
                 tick_labels=seeds,
                 boxprops=dict(facecolor="#cfe3f7", edgecolor="#3b6ea5"),
                 medianprops=dict(color="#3b6ea5"))
-    ax1.set_xlabel("Seed")
-    ax1.set_ylabel("Threshold Distribution")
-    ax1.set_title("Youden's Optimal Threshold Distribution")
+    ax1.set_xlabel("Seed",fontsize=14)
+    ax1.set_ylabel("Threshold Distribution",fontsize=14)
+    ax1.set_title("Youden's Optimal Threshold Distribution", fontsize=16)
     ax1.grid(axis="y", linestyle=":", alpha=0.5)
 
     plt.tight_layout()
