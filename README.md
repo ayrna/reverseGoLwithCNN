@@ -1,5 +1,5 @@
 # **Reverse Game of Life with CNN**
-![Status](https://img.shields.io/badge/status-active-brightgreen?logo=git&logoColor=white)
+![Status](https://img.shields.io/badge/status-stable-8a2be2?logo=git&logoColor=white)
 [![Python 3.10.19](https://img.shields.io/badge/Python-3.10.19-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
 ![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=flat&logo=tensorflow&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?logo=PyTorch&logoColor=white)
